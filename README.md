@@ -14,9 +14,9 @@ To run the game engine, call the command:
 
 `-m` -> A map file located in the maps folder. (e.g. `map_1` where location: maps/map_1.json) (If a valid map file isn't given, a random map is generated for the game.)
 
-`-b` -> A bot file (for blue bot) located in the bots folder. (e.g. `dumb_bot` where location: bots/dumb_bot.py)
+`-b` -> A bot file (for blue bot) located in the bots folder. (e.g. `example_bot` where location: bots/example_bot.py)
 
-`-r` -> A bot file (for red bot) located in the bots folder. (e.g. `dumb_bot` where location: bots/dumb_bot.py) 
+`-r` -> A bot file (for red bot) located in the bots folder. (e.g. `example_bot` where location: bots/example_bot.py) 
 
 OR
 
@@ -32,6 +32,6 @@ OR
 
 ### Example commands:
 
-`python3 run_game.py -m main -b nothing_bot -r dumb_bot -rp`
+`python3 run_game.py -m main -b nothing_bot -r example_bot -rp`
 
-`python3 run_game.py -m game_2 -b edge_bot -r dumb_bot -rp -sb -sr`
+`python3 run_game.py -m game_2 -b edge_bot -r example_bot -rp -sb -sr`
