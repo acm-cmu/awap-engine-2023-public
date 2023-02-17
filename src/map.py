@@ -114,7 +114,7 @@ class Map:
                 normList = json.load(f)
             self._tiles = MapReader.generateMap(normList,radius=radius)
         else:
-            self._tiles = MapReader.generateRandMap(GameConstants.MAP_HEIGHT,GameConstants.MAP_WIDTH, radius=radius)
+            self._tiles = MapReader.generateRandMap(GameConstants.MAX_MAP_HEIGHT,GameConstants.MAX_MAP_WIDTH, radius=radius)
             MapReader.saveMap(self._tiles, path.split('/')[1].split(".")[0])            
 
         # Store Variables
