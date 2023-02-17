@@ -179,6 +179,8 @@ class GameState:
 
 
     def spawn_robot(self, type: RobotType, row: int, col: int) -> RobotInfo:
+        self.__assert_can_spawn_robot(type,row,col)
+
         # Get current robots
         currTeam = self.__info.get("team")
         robots = self.__get_ally_robots_obj()
@@ -255,7 +257,6 @@ class GameState:
         # Take robot action
         currRobot = robots.get(robotName)
         retList = currRobot.take_action(self.__map)
-
 
         # Change metal based on action
         if (currRobot.get_type() == RobotType.MINER):
@@ -360,10 +361,8 @@ class GameState:
 
 
     def transform_robot(self, robotName: str, type: RobotType) -> RobotInfo:
-
         self.__assert_can_transform_robot(robotName, type)
         
-
         # Get current robots
         currTeam = self.get_team()
         robots = self.__get_ally_robots_obj()

@@ -197,7 +197,6 @@ class Game:
             else:
                 self.info.update({'blue_metal':self.info.get('blue_metal') + self.passive_metal})
 
-
         # Update Robots Battery on Terraform Tiles
         for robot_name in robots.keys():
             currRobot : Robot = robots.get(robot_name)
