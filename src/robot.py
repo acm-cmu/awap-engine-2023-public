@@ -144,7 +144,14 @@ class Terraformer_Robot(Robot):
 
         if (map.get_tile_state(self._row, self._col, self._team) != TileState.TERRAFORMABLE):
             raise IllegalActionError(f"Tried to terraform a non-terraformable tile at {self._row, self._col}")
-        if map._tiles[self._row][self._col].terraform == GameConstants.TERRAFORM_MAX:
+
+        new_val = map._tiles[self._row][self._col].get_terraform()
+        if self._team == Team.BLUE:
+            new_val += 1
+        else:
+            new_val -= 1
+
+        if not (-GameConstants.TERRAFORM_MAX <= new_val <= GameConstants.TERRAFORM_MAX):
             raise IllegalActionError(f"Tried to terraform a tile that has max terraform at {self._row, self._col}")
 
 
@@ -156,6 +163,11 @@ class Terraformer_Robot(Robot):
         self._acted = True
         self._battery -= self._action_cost
         map.terraform(self._row, self._col, self._team)
+
+        v = map._tiles[self._row][self._col].get_terraform()
+        if not (-GameConstants.TERRAFORM_MAX <= v <= GameConstants.TERRAFORM_MAX):
+            raise Exception(f"bad {v} at {self._row, self._col}")
+
         return [self.get_coord()]
 
 
