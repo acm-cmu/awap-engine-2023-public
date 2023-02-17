@@ -1,5 +1,5 @@
 {
 	"map": "map",
-	"blue_bot": "e2_bot",
-	"red_bot": "nothing_bot"
+	"blue_bot": "example_bot",
+	"red_bot": "example_bot"
 }
