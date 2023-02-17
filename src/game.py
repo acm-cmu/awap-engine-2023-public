@@ -232,7 +232,7 @@ class Game:
         if thread.is_alive() or funcTime >= time_left:
             if (team == Team.RED): replay_team = "red"
             else: replay_team = "blue"
-            self.replay.addTurn(replay_team, -1, turn, -1, timeout=True)
+            self.replay.addTurn(replay_team, -1, turn, -1, -1, timeout=True)
             return True
 
         # Change Replay File
