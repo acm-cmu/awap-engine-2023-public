@@ -51,6 +51,8 @@ class GameConstants:
     This is an example from last year
     """
     # Map Constants
+    MIN_MAP_WIDTH = 16              # max map width
+    MIN_MAP_HEIGHT = 16              # max map width
     MAX_MAP_WIDTH = 48              # max map width
     MAX_MAP_HEIGHT = 48             # max map height
     NUM_TURNS = 200                 # turns per player

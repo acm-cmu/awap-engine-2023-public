@@ -34,6 +34,11 @@ def validate_map(map_name, map):
 
     height, width = len(map), len(map[0])
 
+
+    assert GameConstants.MIN_MAP_HEIGHT <= height <= GameConstants.MAX_MAP_HEIGHT, f"bad height {height}" 
+    assert GameConstants.MIN_MAP_WIDTH <= width <= GameConstants.MAX_MAP_WIDTH, f"bad width {width}"
+
+
     # make sure each 
     for row in range(height):
         assert len(map[row]) == width, f"bad map {map_name} weird row {row}"
