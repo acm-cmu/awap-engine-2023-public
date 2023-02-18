@@ -6,6 +6,7 @@ import json
 from os.path import isfile
 from src.info import RobotInfo, TileInfo
 from src.errors import *
+from src.map_validate import val_map_wrap
 
 
 class Tile:
@@ -112,6 +113,8 @@ class Map:
         if isfile(path):
             with open(path) as f:
                 normList = json.load(f)
+            val_map_wrap(normList)
+
             self._tiles = MapReader.generateMap(normList,radius=radius)
         else:
             self._tiles = MapReader.generateRandMap(GameConstants.MAX_MAP_HEIGHT,GameConstants.MAX_MAP_WIDTH, radius=radius)
