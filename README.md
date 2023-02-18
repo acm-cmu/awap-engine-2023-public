@@ -32,6 +32,6 @@ OR
 
 ### Example commands:
 
-`python3 run_game.py -m main -b nothing_bot -r example_bot -rp`
+`python3 run_game.py -m main -b example_bot -r example_bot -rp`
 
-`python3 run_game.py -m game_2 -b edge_bot -r example_bot -rp -sb -sr`
+`python3 run_game.py -m game_2 -b example_bot -r example_bot -rp -sb -sr`
