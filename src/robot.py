@@ -51,9 +51,12 @@ class Robot:
     def set_battery(self, battery) -> None:
         self._battery = battery
 
-    def charge(self, charge: int) -> None:
+    def charge(self, charge: int) -> bool:
+        if self._battery >= GameConstants.INIT_BATTERY:
+            return False
         self._battery += charge
         self._battery = min(self._battery, GameConstants.INIT_BATTERY)
+        return True
 
     def reset_move_status(self) -> None:
         self._moved = False

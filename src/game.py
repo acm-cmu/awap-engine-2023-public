@@ -204,7 +204,9 @@ class Game:
             currRobot.reset_move_status()
             row, col = currRobot.get_coord()
             if (self.map.is_terraformed(team, row, col)):
-                currRobot.charge(self.robot_charge)
+                if currRobot.charge(self.robot_charge):
+                    self.replay.add_robot_changes(currRobot, False)
+
 
         # Suppress Print
         if(team == Team.BLUE and self.silence_blue):
