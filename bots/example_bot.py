@@ -54,46 +54,70 @@ class BotPlayer(Player):
 
         if (not self.getValue(x + 2, y) or
                 not self.getValue(x + 2, y - 1) or
-                not self.getValue(x + 2, y + 1)):
-            self.set_explored_true(x + 1, y)
+                not self.getValue(x + 2, y + 1)) and game_state.can_move_robot(rname, Direction.DOWN):
+            self.set_explored_true(x + 1, y, game_state)
+            print(rname, " going down")
             game_state.move_robot(rname, Direction.DOWN)
         elif (not self.getValue(x - 2, y) or
                 not self.getValue(x - 2, y - 1) or
-                not self.getValue(x - 2, y + 1)):
-            self.set_explored_true(x - 1, y)
+                not self.getValue(x - 2, y + 1)) and game_state.can_move_robot(rname, Direction.UP):
+            self.set_explored_true(x - 1, y, game_state)
+            print(rname, " going up")
             game_state.move_robot(rname, Direction.UP)
         elif (not self.getValue(x, y + 2) or
                 not self.getValue(x - 1, y + 2) or
-                not self.getValue(x + 1, y + 2)):
-            self.set_explored_true(x, y + 1)
+                not self.getValue(x + 1, y + 2)) and game_state.can_move_robot(rname, Direction.RIGHT):
+            self.set_explored_true(x, y + 1, game_state)
+            print(rname, " going right")
             game_state.move_robot(rname, Direction.RIGHT)
+
         elif (not self.getValue(x, y - 2) or
                 not self.getValue(x - 1, y - 2) or
-                not self.getValue(x + 1, y - 2)):
-            self.set_explored_true(x, y - 1)
+                not self.getValue(x + 1, y - 2)) and game_state.can_move_robot(rname, Direction.LEFT):
+            self.set_explored_true(x, y - 1, game_state)
+            print(rname, " going left")
             game_state.move_robot(rname, Direction.LEFT)
-        elif not self.getValue(x + 2, y + 2):
-            self.set_explored_true(x + 1, y + 1)
+        elif not self.getValue(x + 2, y + 2) and game_state.can_move_robot(rname, Direction.DOWN_RIGHT):
+            self.set_explored_true(x + 1, y + 1, game_state)
+            print(rname, " going down right")
             game_state.move_robot(rname, Direction.DOWN_RIGHT)
-        elif not self.getValue(x - 2, y - 2):
-            self.set_explored_true(x - 1, y - 1)
+        elif not self.getValue(x - 2, y - 2) and game_state.can_move_robot(rname, Direction.UP_LEFT):
+            self.set_explored_true(x - 1, y - 1, game_state)
+            print(rname, " going up left")
             game_state.move_robot(rname, Direction.UP_LEFT)
-        elif not self.getValue(x + 2, y - 2):
-            self.set_explored_true(x + 1, y - 1)
+        elif not self.getValue(x + 2, y - 2) and game_state.can_move_robot(rname, Direction.DOWN_LEFT):
+            self.set_explored_true(x + 1, y - 1, game_state)
             game_state.move_robot(rname, Direction.DOWN_LEFT)
-        elif not self.getValue(x - 2, y + 2):
-            self.set_explored_true(x - 1, y + 1)
+        elif not self.getValue(x - 2, y + 2) and game_state.can_move_robot(rname, Direction.UP_RIGHT):
+            self.set_explored_true(x - 1, y + 1, game_state)
             game_state.move_robot(rname, Direction.UP_RIGHT)
-    def set_explored_true(self, x, y):
+        else:
+            # random move anywhere
+            all_dirs = [dir for dir in Direction]
+            for d in all_dirs:
+                if game_state.can_move_robot(rname, d):
+                    game_state.move_robot(rname, d)
+                    break
 
+        if game_state.can_robot_action(rname):
+            game_state.robot_action(rname)
+
+    def set_explored_true(self, x, y, game_state):
         for i in range(-1, 2):
             for j in range(-1, 2):
                 x1 = x + i
                 y1 = y + j
                 if 0 <= x1 < self.explored.shape[0] and 0 <= y1 < self.explored.shape[1]:
+                    tile = game_state.get_map()[x1][y1]
+                    if tile is not None and tile.mining and tile.mining > 0:
+                        self.deposit_tiles[(x1, y1)] = tile.mining
+                    elif tile is not None and tile.terraform and 10 > tile.terraform >= -10:
+                        self.terraformable_tiles[(x1, y1)] = tile.terraform
                     self.explored[x1][y1] = True
 
     def __init__(self, team: Team):
+        self.deposit_tiles = {}
+        self.terraformable_tiles = {}
         self.team = team
         self.explored = None
         self.first_time = True
@@ -133,13 +157,17 @@ class BotPlayer(Player):
         if len(ally_tiles) > 0:
             # pick a random one to spawn on
             spawn_loc = random.choice(ally_tiles)
-            spawn_type = random.choice([RobotType.MINER, RobotType.EXPLORER, RobotType.TERRAFORMER])
+            if self.first_time or len(self.deposit_tiles) == 0:
+                spawn_type = RobotType.EXPLORER
+                self.first_time = False
+            else:
+                spawn_type = random.choice([RobotType.MINER, RobotType.EXPLORER, RobotType.TERRAFORMER])
             # spawn the robot
-            print(f"Spawning robot at {spawn_loc.row, spawn_loc.col}")
+
             # check if we can spawn here (checks if we can afford, tile is empty, and tile is ours)
             if game_state.can_spawn_robot(spawn_type, spawn_loc.row, spawn_loc.col):
-                game_state.spawn_robot(spawn_type, spawn_loc.row, spawn_loc.col)
-
+                r = game_state.spawn_robot(spawn_type, spawn_loc.row, spawn_loc.col)
+                print(f"Spawning robot at {spawn_loc.row, spawn_loc.col} which is {r.type}")
         # move robots
         robots = game_state.get_ally_robots()
 
@@ -148,22 +176,22 @@ class BotPlayer(Player):
             print(f"Robot {rname} at {rob.row, rob.col}")
             if rob.type == RobotType.EXPLORER:
                 self.explore(rob, rname, game_state)
-                return
-            # randomly move if possible
-            all_dirs = [dir for dir in Direction]
-            move_dir = random.choice(all_dirs)
+            else:
+                # randomly move if possible
+                all_dirs = [dir for dir in Direction]
+                move_dir = random.choice(all_dirs)
 
-            # check if we can move in this direction
-            if game_state.can_move_robot(rname, move_dir):
-                # try to not collide into robots from our team
-                dest_loc = (rob.row + move_dir.value[0], rob.col + move_dir.value[1])
-                dest_tile = game_state.get_map()[dest_loc[0]][dest_loc[1]]
+                # check if we can move in this direction
+                if game_state.can_move_robot(rname, move_dir):
+                    # try to not collide into robots from our team
+                    dest_loc = (rob.row + move_dir.value[0], rob.col + move_dir.value[1])
+                    dest_tile = game_state.get_map()[dest_loc[0]][dest_loc[1]]
 
-                if dest_tile.robot is None or dest_tile.robot.team != self.team:
-                    game_state.move_robot(rname, move_dir)
+                    if dest_tile.robot is None or dest_tile.robot.team != self.team:
+                        game_state.move_robot(rname, move_dir)
 
-            # action if possible
-            if game_state.can_robot_action(rname):
-                game_state.robot_action(rname)
+                # action if possible
+                if game_state.can_robot_action(rname):
+                    game_state.robot_action(rname)
 
 
