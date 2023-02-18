@@ -19,7 +19,7 @@ class BotPlayer(Player):
         ginfo = game_state.get_info()
 
         # get turn/team info
-        width, height = len(ginfo.map), len(ginfo.map[0])
+        height, width = len(ginfo.map), len(ginfo.map[0])
 
         # print info about the game
         print(f"Turn {ginfo.turn}, team {ginfo.team}")
