@@ -4,6 +4,7 @@ and running the match.
 """
 import argparse
 from src.game import Game
+from src.map_validate import val_maps
 from os import path
 import json
 from src.errors import *
@@ -19,9 +20,14 @@ def main():
     parser.add_argument('-sb', '--silence_blue', action='store_true', help="silence blue bot verbose")
     parser.add_argument('-sr', '--silence_red', action='store_true', help="silence red bot verbose")
     parser.add_argument('-f', '--file_input', help="read game settings (map, blueBot, redBot) from specified file")
+    parser.add_argument('-vm', '--validate_map', action='store_true', help="runs map validator only")
 
     # Define Input through CLI
     currNamespace = parser.parse_args()
+
+    if currNamespace.validate_map:
+        val_maps()
+        return
 
     
     if currNamespace.file_input is not None:
