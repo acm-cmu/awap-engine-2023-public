@@ -19,12 +19,15 @@ def get_ver_sym( height, width):
 def val_map_wrap(map):
     try:
         validate_map("current", map)
-    finally:
+    except AssertionError as e:
         # traceback.print_exc()
         print("\n\nMAP IS BAD SEE BELOW REASONS")
         print("MAKE SURE YOU HAVE THE LATEST MAPS FROM GITHUB")
         print("IF THIS MAP IS WHAT IS CURRENTLY ON GITHUB, PLEASE LET US KNOW ON DISCORD, THANK YOU!")
         print("\n")
+
+        raise e
+    
 
 
     
