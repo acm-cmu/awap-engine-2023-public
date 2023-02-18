@@ -3,14 +3,103 @@ from src.game_state import GameState, GameInfo
 from src.player import Player
 from src.map import TileInfo, RobotInfo
 import random
+import numpy as np
+
 
 class BotPlayer(Player):
     """
     Players will write a child class that implements (notably the play_turn method)
     """
 
+    def getValue(self, x, y):
+        if x >= 0 and x < self.explored.shape[0] and y >= 0 and y < self.explored.shape[1]:
+            return self.explored[x][y]
+        return False
+
+    def explore(self, rob, rname, game_state):
+        # get the current location
+        x = rob.row, y = rob.col
+        """
+        explored[x][y + 1], explored[x][y - 1],
+        explored[x + 1][y], explored[x - 1][y],
+        explored[x + 1][y + 1], explored[x - 1][y - 1],
+        explored[x + 1][y - 1], explored[x - 1][y + 1]
+        should all be true
+        
+        neighbours of (x + 1, y)
+        (x + 2, y); (x + 2, y - 1); (x + 2, y + 1)
+        
+        neighbours of (x - 1, y)
+        (x - 2, y); (x - 2, y - 1); (x - 2, y + 1)
+        
+        neighbours of (x, y + 1):
+        (x, y + 2); (x - 1, y + 2); (x + 1, y + 2)
+        
+        neighbours of (x, y - 1):
+        (x, y - 2); (x - 1, y - 2); (x + 1, y - 2)
+        
+        neighbour of (x + 1, y + 1):
+        (x + 2, y + 2)
+        
+        neighbour of (x - 1, y - 1):
+        (x - 2, y - 2)
+        
+        neighbour of (x - 1, y + 1):
+        (x - 2, y + 2)
+        
+        neighbour of (x + 1, y - 1):
+        (x + 2, y - 2)
+        """
+
+        if (not self.getValue(x + 2, y) or
+                not self.getValue(x + 2, y - 1) or
+                not self.getValue(x + 2, y + 1)):
+            self.set_explored_true(x + 1, y)
+            game_state.move_robot(rname, Direction.DOWN)
+        elif (not self.getValue(x - 2, y) or
+                not self.getValue(x - 2, y - 1) or
+                not self.getValue(x - 2, y + 1)):
+            self.set_explored_true(x - 1, y)
+            game_state.move_robot(rname, Direction.UP)
+        elif (not self.getValue(x, y + 2) or
+                not self.getValue(x - 1, y + 2) or
+                not self.getValue(x + 1, y + 2)):
+            self.set_explored_true(x, y + 1)
+            game_state.move_robot(rname, Direction.RIGHT)
+        elif (not self.getValue(x, y - 2) or
+                not self.getValue(x - 1, y - 2) or
+                not self.getValue(x + 1, y - 2)):
+            self.set_explored_true(x, y - 1)
+            game_state.move_robot(rname, Direction.LEFT)
+        elif not self.getValue(x + 2, y + 2):
+            self.set_explored_true(x + 1, y + 1)
+            game_state.move_robot(rname, Direction.DOWN_RIGHT)
+        elif not self.getValue(x - 2, y - 2):
+            self.set_explored_true(x - 1, y - 1)
+            game_state.move_robot(rname, Direction.UP_LEFT)
+        elif not self.getValue(x + 2, y - 2):
+            self.set_explored_true(x + 1, y - 1)
+            game_state.move_robot(rname, Direction.DOWN_LEFT)
+        elif not self.getValue(x - 2, y + 2):
+            self.set_explored_true(x - 1, y + 1)
+            game_state.move_robot(rname, Direction.UP_RIGHT)
+
+
+        pass
+
+    def set_explored_true(self, x, y):
+        self.explored[x][y] = True
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                x1 = x + i
+                y1 = y + j
+                if 0 <= x1 < self.explored.shape[0] and 0 <= y1 < self.explored.shape[1]:
+                    self.explored[x1][y1] = True
+
     def __init__(self, team: Team):
         self.team = team
+        self.explored = None
+        self.first_time = True
         return
 
     def play_turn(self, game_state: GameState) -> None:
@@ -20,6 +109,8 @@ class BotPlayer(Player):
 
         # get turn/team info
         height, width = len(ginfo.map), len(ginfo.map[0])
+        if self.explored is None:
+            self.explored = np.array(dtype=bool, shape=(height, width))
 
         # print info about the game
         print(f"Turn {ginfo.turn}, team {ginfo.team}")
@@ -33,11 +124,11 @@ class BotPlayer(Player):
                 # get the tile at (row, col)
                 tile = ginfo.map[row][col]
                 # skip fogged tiles
-                if tile is not None: # ignore fogged tiles
-                    if tile.robot is None: # ignore occupied tiles
-                        if tile.terraform > 0: # ensure tile is ally-terraformed
+                if tile is not None:  # ignore fogged tiles
+                    if tile.robot is None:  # ignore occupied tiles
+                        if tile.terraform > 0:  # ensure tile is ally-terraformed
                             ally_tiles += [tile]
-
+                            self.explored[row][col] = True
         print("Ally tiles", ally_tiles)
 
         # spawn on a random tile
@@ -52,14 +143,15 @@ class BotPlayer(Player):
             if game_state.can_spawn_robot(spawn_type, spawn_loc.row, spawn_loc.col):
                 game_state.spawn_robot(spawn_type, spawn_loc.row, spawn_loc.col)
 
-
         # move robots
         robots = game_state.get_ally_robots()
 
         # iterate through dictionary of robots
         for rname, rob in robots.items():
             print(f"Robot {rname} at {rob.row, rob.col}")
-
+            if (rob.type == RobotType.EXPLORER):
+                self.explore(rob, rname, game_state)
+                return
             # randomly move if possible
             all_dirs = [dir for dir in Direction]
             move_dir = random.choice(all_dirs)
@@ -77,5 +169,4 @@ class BotPlayer(Player):
             if game_state.can_robot_action(rname):
                 game_state.robot_action(rname)
 
-        
 
