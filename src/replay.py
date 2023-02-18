@@ -11,6 +11,7 @@ class Turn:
     turn_number: int
     metal: int
     num_robots: int
+    num_terr: int
     time_left: float
     tiles_explored: list[tuple[int, int]]
     tiles_terraformed: list[tuple[int, int]]
@@ -96,7 +97,7 @@ class Replay:
             entry.append("blue")
         self.robot_changes.append(tuple(entry))
 
-    def addTurn(self, team: str, time_left : float, num_robots : int, turn_number: int, metal: int, timeout = False):
+    def addTurn(self, team: str, time_left : float, num_robots : int, num_terr : int, turn_number: int, metal: int, timeout = False):
         # If timeout, than add turn while ignoring tiles
         if timeout:
             turn = Turn(
@@ -104,6 +105,7 @@ class Replay:
                 turn_number,
                 metal,
                 num_robots,
+                num_terr,
                 time_left,
                 [],
                 [],
@@ -117,6 +119,7 @@ class Replay:
             turn_number,
             metal,
             num_robots,
+            num_terr,
             time_left,
             self.explored_tiles,
             self.terraformed_tiles,

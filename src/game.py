@@ -229,11 +229,12 @@ class Game:
         if(team == Team.RED and self.silence_red):
             sys.stdout = stdout
 
+
         # If there is still time left, automatically lose on timeout
         if thread.is_alive() or funcTime >= time_left:
             if (team == Team.RED): replay_team = "red"
             else: replay_team = "blue"
-            self.replay.addTurn(replay_team, -1, turn, -1, -1, timeout=True)
+            self.replay.addTurn(replay_team, -1, -1, -1, turn, -1, timeout=True)
             return True
 
         # Change Replay File
@@ -248,6 +249,20 @@ class Game:
             self.info.update({'blue_time':self.info.get('blue_time') - funcTime})
             time_left = self.info.get('blue_time')
 
+
+        # count terraformed tiles
+        num_terr = self.get_tile_count(team)
+
         # Turn Details
-        self.replay.addTurn(replay_team, time_left, len(robots), turn, metal)
+        self.replay.addTurn(replay_team, time_left, len(robots), num_terr, turn, metal)
         return False
+
+
+    def get_tile_count(self, team):
+        count = 0
+        map = self.map
+        for row in range(map.get_height()):
+            for col in range(map.get_width()):
+                if self.map.is_terraformed(team, row, col):
+                    count += 1
+        return count
