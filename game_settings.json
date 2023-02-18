@@ -1,5 +1,5 @@
 {
-	"map": "awawawap",
-	"blue_bot": "nothing_bot",
-	"red_bot": "nothing_bot"
+	"map": "9_battle",
+	"blue_bot": "ult_bot_silent",
+	"red_bot": "dumb_bot"
 }
